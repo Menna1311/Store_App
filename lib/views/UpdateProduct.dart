@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:store_app/models/products_model.dart';
 import 'package:store_app/widgets/Custom_textField.dart';
 
-class Updateproduct extends StatelessWidget {
+class Updateproduct extends StatefulWidget {
   Updateproduct({super.key});
   static String routeName = "Updateproduct";
+
+  @override
+  State<Updateproduct> createState() => _UpdateproductState();
+}
+
+class _UpdateproductState extends State<Updateproduct> {
   String? productname, price, description, image;
+  bool isLoading = false;
   Dio dio = Dio();
+
   @override
   Widget build(BuildContext context) {
     Product product = ModalRoute.of(context)!.settings.arguments as Product;
@@ -31,6 +39,7 @@ class Updateproduct extends StatelessWidget {
               height: 20,
             ),
             CustomtextField(
+                keyboardType: TextInputType.number,
                 hint: 'Price',
                 onChange: (value) {
                   price = value;
@@ -52,22 +61,33 @@ class Updateproduct extends StatelessWidget {
                   image = value;
                 }),
             Spacer(),
-            ElevatedButton(
-              onPressed: () async {
-                Response response = await dio.put(
-                  'https://fakestoreapi.com/products/${product.id}',
-                  data: {
-                    'title': productname,
-                    'price': price,
-                    'description': description,
-                    'image': image,
-                    'category': product.category,
-                  },
-                );
-                print('done $response');
-              },
-              child: Text('Update product'),
-            ),
+            isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: () async {
+                      isLoading = true;
+                      setState(() {});
+                      try {
+                        Response response = await dio.put(
+                          'https://fakestoreapi.com/products/${product.id}',
+                          data: {
+                            'title': productname,
+                            'price': price,
+                            'description': description,
+                            'image': image,
+                            'category': product.category,
+                          },
+                        );
+                        print('done $response');
+                      } on Exception catch (e) {
+                        // TODO
+                      } finally {
+                        isLoading = false;
+                        setState(() {});
+                      }
+                    },
+                    child: Text('Update product'),
+                  ),
           ],
         ),
       ),
